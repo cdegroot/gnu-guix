@@ -127,7 +127,7 @@ driver is known to work with these printers:
 (define-public cups-filters
   (package
     (name "cups-filters")
-    (version "1.28.9")
+    (version "1.28.12")
     (source(origin
               (method url-fetch)
               (uri
@@ -135,7 +135,7 @@ driver is known to work with these printers:
                               "cups-filters-" version ".tar.xz"))
               (sha256
                (base32
-                "1bk0x1rrb8wqbhh5c979ppgy6s2kqss8mjdlahgcjvd79wm3fs9g"))
+                "0fislfr01rc09bj5na9mx3w0wffgb4g53riwhsxj5ljai0yymqj6"))
               (modules '((guix build utils)))
               (snippet
                ;; install backends, banners and filters to cups-filters output
@@ -150,6 +150,8 @@ driver is known to work with these printers:
                     ;; stripped.
                     (("pkgbackenddir = \\$\\(CUPS_SERVERBIN\\)/backend")
                      "pkgbackenddir = $(PREFIX)/lib/cups/backend")
+                    (("pkgppdgendir = \\$\\(CUPS_SERVERBIN\\)/driver")
+                     "pkgppdgendir = $(PREFIX)/lib/cups/driver")
                     (("pkgfilterdir = \\$\\(CUPS_SERVERBIN\\)/filter")
                      "pkgfilterdir = $(PREFIX)/lib/cups/filter"))
                   ;; Find bannertopdf data such as the print test page in our
@@ -162,7 +164,7 @@ driver is known to work with these printers:
     (arguments
      `(#:make-flags (list (string-append "PREFIX=" %output))
        #:configure-flags
-       `("--disable-driverless" ; TODO: enable this
+       `("--enable-driverless"
          "--disable-mutool"     ; depends on yet another PDF library (mupdf)
 
          ;; Look for the "domain socket of CUPS" in /var/run/cups.
@@ -171,6 +173,9 @@ driver is known to work with these printers:
          ;; Free software for the win.
          "--with-acroread-path=evince"
 
+         ,(string-append "--with-ippfind-path="
+                         (assoc-ref %build-inputs "cups-minimal")
+                         "/bin/ippfind")
          ,(string-append "--with-test-font-path="
                          (assoc-ref %build-inputs "font-dejavu")
                          "/share/fonts/truetype/DejaVuSans.ttf")
@@ -271,8 +276,8 @@ filters for the PDF-centric printing workflow introduced by OpenPrinting.")
      `(#:configure-flags
        '("--disable-launchd"
          "--disable-systemd"
-         "--disable-avahi"
-         "--disable-dnssd")
+         "--enable-avahi"
+         "--enable-dnssd")
        ;; Seven tests fail, mostly because of files that are provided by the
        ;; cups-filters package.
        #:tests? #f
@@ -318,7 +323,7 @@ filters for the PDF-centric printing workflow introduced by OpenPrinting.")
     (native-inputs
      (list pkg-config))
     (inputs
-     (list zlib gnutls))
+     (list zlib gnutls avahi))
     (home-page "https://openprinting.github.io/")
     (synopsis "The Common Unix Printing System")
     (description
