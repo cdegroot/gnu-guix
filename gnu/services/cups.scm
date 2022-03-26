@@ -169,7 +169,7 @@
 (define (serialize-host-name-lookups field-name val)
   (serialize-field field-name
                    (match val (#f "No") (#t "Yes") ('double "Double"))))
-  
+
 (define (host-name-list-or-*? x)
     (or (eq? x '*)
         (and (list? x) (and-map string? x))))
@@ -1021,6 +1021,13 @@ extensions that it uses."
            (start #~(make-forkexec-constructor
                      (list (string-append #$cups "/sbin/cupsd")
                            "-f" "-c" #$cupsd.conf "-s" #$cups-files.conf)))
+           (stop #~(make-kill-destructor)))
+          (shepherd-service
+           (documentation "Run the CUPS mDNS/Avahi browser.")
+           (provision '(cups-browsed))
+           (requirement '(networking cups))
+           (start #~(make-forkexec-constructor
+                     (list (string-append #$cups-filters "/sbin/cups-browsed"))))
            (stop #~(make-kill-destructor))))))
 
 (define cups-service-type
