@@ -169,6 +169,7 @@ driver is known to work with these printers:
 
          ;; Look for the "domain socket of CUPS" in /var/run/cups.
          "--localstatedir=/var"
+         "--with-cups-domainsocket=/var/run/cups/cups.sock"
 
          ;; Free software for the win.
          "--with-acroread-path=evince"
@@ -276,6 +277,7 @@ filters for the PDF-centric printing workflow introduced by OpenPrinting.")
      `(#:configure-flags
        '("--disable-launchd"
          "--disable-systemd"
+         "--with-domainsocket=/var/run/cups/cups.sock"
          "--enable-avahi"
          "--enable-dnssd")
        ;; Seven tests fail, mostly because of files that are provided by the
